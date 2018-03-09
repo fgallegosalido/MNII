@@ -9,3 +9,17 @@ secant(f, x0, x1, tol, n,k):= block(
         m : m + 1),
     return (float(x2))
 )$
+
+secant2(f, x0, x1, tol, n,k):= block(
+    [m:0],
+    for m thru n do(
+        x2 : x1 - ((x1 - x0) * f(x1))/(f(x1) - f(x0)),
+        x0 : x1,
+        x1 : x2,
+    
+        if k=1 then print(float(x2)),
+        
+        if tol <= abs(x1 - x0) break
+    ),
+    return (float(x2))
+)$
