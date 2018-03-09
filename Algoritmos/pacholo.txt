@@ -1,0 +1,11 @@
+secant(f, x0, x1, tol, n,k):= block(
+    [m:1],[x2 : x1 - ((x1 - x0) * f(x1))/(f(x1) - f(x0))],
+    while tol <= abs(x2 - x1) and m < n do(
+        x0 : x1,
+        x1 : x2,
+
+        x2 : x1 - ((x1 - x0) * f(x1))/(f(x1) - f(x0)),
+        if k=1 then print(float(x2)),
+        m : m + 1),
+    return (float(x2))
+)$
