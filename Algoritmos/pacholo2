@@ -1,0 +1,86 @@
+(%i2)	separa_intervalo(a,b,n):=block(
+	    h: float((b-a)/n),
+	    array: [float(a)],
+	    for i:1 thru n do(
+	        array:append(array, [a+i*h])
+	    ),
+	    return (array)
+	)$
+	valores : separa_intervalo(0,1,2);
+	
+(valores)	[0.0,0.5,1.0]
+(%i136)	lagrange_base(a,b,n):=block(
+	    [v:separa_intervalo(a,b,n),  w:[]],
+	    for i:1 thru n+1 do(
+	              
+	        l1:product((x-v[j])/(v[i]-v[j]), j,   1, i-1),
+	        
+	        l2:product((x-v[j])/(v[i]-v[j]), j, i+1, n+1),
+	        
+	        l:l1*l2,
+	        
+	        /*print(l(x)),*/     
+	        
+	        w:append(w,[l])
+	        /*for j:i+1 thru n+1 do(
+	            aux(x):=l(x)*(x-v[j])/(v[i]-v[j]),
+	            l(x)= aux(x)
+	        ),
+	        */
+	    ),
+	    return(w)
+	)$
+	v:separa_intervalo(0,1,2),
+	cholo:lagrange_base(0,1,2);
+	f:x*x;
+	f:f*2;
+	g:integrate(f,x,0,1);
+	resultado:sum(expand(f(v[i])*cholo[i]),i,1,3);
+	
+(v)	[0.0,0.5,1.0]
+(f)	x^2
+(f)	2*x^2
+(g)	2/3
+(resultado)	1.0*x^2
+(%i191)	newton_cotes(a,b,n):=block(
+	    [v:lagrange_base(a,b,n),  w:[],ratprint:false],
+	    for i:1 thru n+1 do(
+	        peso:integrate(v[i],x,a,b),
+	        w:append(w,[peso])
+	    ),
+	    return(w)
+	)$
+	f:x^2;
+	v:separa_intervalo(0,1,2);
+	w:newton_cotes(0,1,2);
+	integral:sum(w[i]*subst(x=v[i],f),i,1,length (w))
+	;
+(f)	x^2
+(v)	[0.0,0.5,1.0]
+(w)	[0.1666666666666667,0.6666666666666666,0.1666666666666667]
+(integral)	0.3333333333333333
+
+(%i83)	gaussiana(f,a,b,n,v):=block(
+	    [ w:[],ratprint:false],
+	    for i:1 thru n+1 do(
+	              
+	          l1:product((x-v[j])/(v[i]-v[j]), j,   1, i-1),
+	        
+	          l2:product((x-v[j])/(v[i]-v[j]), j, i+1, n+1),
+	        
+	          l:l1*l2,
+	         peso: integrate(l,x,-1,1),
+	        print(peso),
+	        w:append(w,[peso])
+	    ),
+	    g:subst(x=((b-a)*t+b+a)/2,f)*(b-a)/2,
+	    integral:sum(w[i]*subst(t=v[i],g),i,1,length(w)),
+	    return(integral)
+	)$
+	v:[-0.7745966692,0.0000000000,0.7745966692];
+	gaussiana(x^2,0,1,2,v);
+(v)	[-0.7745966692,0.0,0.7745966692]
+0.5555555556150609" "
+0.8888888887698841" "
+0.5555555556150609" "
+(%o83)	0.3333333333333341
