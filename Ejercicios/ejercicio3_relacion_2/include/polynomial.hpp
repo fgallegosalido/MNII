@@ -236,7 +236,7 @@ namespace detail{
             Polynomial& operator*=(const U& other){
                 std::transform(coeffs.begin(), coeffs.end(), coeffs.begin(),
                                 [&other](const value_type& val){
-                                    return val*=static_cast<value_type>(other);
+                                    return val*static_cast<value_type>(other);
                                 });
                 return *this;
             }
@@ -244,7 +244,7 @@ namespace detail{
             Polynomial& operator/=(const U& other){
                 std::transform(coeffs.begin(), coeffs.end(), coeffs.begin(),
                                 [&other](const value_type& val){
-                                    return val/=static_cast<value_type>(other);
+                                    return val/static_cast<value_type>(other);
                                 });
                 return *this;
             }

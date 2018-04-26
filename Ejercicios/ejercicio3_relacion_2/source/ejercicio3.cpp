@@ -14,9 +14,9 @@ auto formula_interpolacion_3_puntos(std::array<punto, 3> &&p){
     double c1 = p[1].second / ((p[1].first-p[0].first)*(p[1].first-p[2].first));
     double c2 = p[2].second / ((p[2].first-p[0].first)*(p[2].first-p[1].first));
 
-    detail::polynomial_double ret{p[1].first*p[2].first*c0, (-p[1].first-p[2].first)*c0, c0};
-    ret += detail::polynomial_double{p[0].first*p[2].first*c1, (-p[0].first-p[2].first)*c1, c1};
-    ret += detail::polynomial_double{p[0].first*p[1].first*c2, (-p[0].first-p[1].first)*c2, c2};
+    detail::polynomial_double ret{p[1].first*p[2].first, (-p[1].first-p[2].first), 1}; ret *= c0;
+    ret += c1*detail::polynomial_double{p[0].first*p[2].first, (-p[0].first-p[2].first), 1};
+    ret += c2*detail::polynomial_double{p[0].first*p[1].first, (-p[0].first-p[1].first), 1};
 
     return ret;
 }
