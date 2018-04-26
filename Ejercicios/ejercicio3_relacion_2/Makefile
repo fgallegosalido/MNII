@@ -5,7 +5,7 @@ SRC = source
 INC = include
 
 CXX = g++
-CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -pedantic -I$(INC)
+CXXFLAGS = -std=c++14 -O2 -Wall -Wextra -pedantic -I$(INC)
 
 all: $(BIN)/ejercicio3
 
