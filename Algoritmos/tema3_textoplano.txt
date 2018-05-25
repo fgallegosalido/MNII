@@ -1,0 +1,129 @@
+Programas Tema 3. Grupo 3
+Método de Euler:
+
+Euler(f, x0, y0, x1, n):=block(
+    vx : makelist(0,n),
+    vy : makelist(0,n),
+    h : (x1 - x0) / float(n),
+    x:x0,
+    y:y0,
+    vx[1]:x0,
+    vy[1]:y0,
+    for i from 1 thru n do(
+        k: (f(x, y)),
+        vx[i]: x0 + i*h,
+        vy[i]: y + h*k,
+        y : vy[i],
+        x : vx[i]
+    ),
+        [vx,vy]
+)$
+
+f_euler(x,y):=x*sqrt(y)$
+f_euler2(x,y):=x$
+f_euler3(x,y):=-y+x+1$
+Euler(f_euler,0,1,10,10)$
+Euler(f_euler2,0,1,5,10)$
+Euler(f_euler3,0,1,1,10)$
+
+Método de Taylor de orden r. En este caso considera además como dato
+de entrada el orden r.
+
+subst([x=9,y=2],diff(x*y^2,y));
+diff(x*y^2,y);
+
+funcion_taylor(f, x0, y0, h, r):=block(
+    g:sum(1/(k!)*h^(k-1)*diff(f(x,y),y,k-1), k, 1, r),
+    valor:subst([x=x0,y=y0],g),
+    return(valor)
+)$
+
+dospuntosvarra(x,y):=y^7*x^2+2*y^3+exp(x)$
+a:funcion_taylor(dospuntosvarra,1,2,3,10)$
+print(a)$
+
+taylor_r(f, x0, y0, x1, r, n):=block(
+    vx : makelist(0,n),
+    vy : makelist(0,n),
+    h : (x1 - x0) / float(n),
+    x:x0,
+    y:y0,
+    vx[1]:x0,
+    vy[1]:y0,
+    for i from 1 thru n do(
+        k:funcion_taylor(f,x,y,h,r),
+        vx[i]: x0 + i*h,
+        vy[i]: y + h*k,
+        y : vy[i],
+        x : vx[i]
+    ),
+        [vx,vy]
+)$
+
+f_taylor(x,y):=x$
+taylor_r(f_taylor,0,1,10,5,10);
+
+
+
+Método de Runge-Kutta de orden 4.
+
+rk4(f, x0, y0, x1, n):=block(
+    vx : makelist(0,n),
+    vy : makelist(0,n),
+    h : (x1 - x0) / float(n),
+    x:x0,
+    y:y0,
+    vx[1]:x0,
+    vy[1]:y0,
+    for i from 1 thru n do(
+        k1: (h * f(x, y)),
+        k2: (h * f(x + 0.5 * h, y + 0.5 * k1)),
+        k3: (h * f(x + 0.5 * h, y + 0.5 * k2)),
+        k4: (h * f(x + h, y + k3)),
+        vx[i]: x0 + i*h,
+        vy[i]: y + (k1 + 2*k2 + 2*k3 + k4) / 6,
+        y : vy[i],
+        x : vx[i]
+    ),
+        [vx,vy]
+)$
+
+f_rk4(x,y):=x*sqrt(y)$
+rk4(f_rk4,0,1,10,10);
+f_rk4_2(x,y):=x$
+rk4(f_rk4_2,0,1,5,10);
+
+
+
+Método del trapecio, usando el método de Newton para aproximar
+la solución de la ecuación no lineal.
+
+
+trapecio(f, x0, y0, x1, n):=block(
+    vx : makelist(0,n),
+    vy : makelist(0,n),
+    h : (x1 - x0) / float(n),
+    x:x0,
+    y:y0,
+    vx[1]:x0,
+    vy[1]:y0,
+    for i from 1 thru n do( 
+        vx[i]: x0 + i*h,
+        vy[i]: y + h*(f(x,y)+f(vx[i],vy[i]))/2,
+        y : vy[i],
+        x : vx[i]
+    ),
+        [vx,vy]
+)$
+
+f_trapecio(x,y):=x*sqrt(y)$
+trapecio(f_trapecio,0,1,10,10);
+f_trapecio2(x,y):=x$
+trapecio(f_trapecio2,0,1,5,10);
+
+
+
+
+Método de Adams-Bashforth de k pasos. En este caso considera
+además como datos de entrada, el número k y los valores
+u1,...,uk−1, obtenidos por otro método de un paso.
