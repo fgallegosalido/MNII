@@ -1,4 +1,4 @@
-Programas Tema 3. Grupo 3
+﻿Programas Tema 3. Grupo 3
 Método de Euler:
 
 Euler(f, a, b, n, y0):=block(
@@ -152,4 +152,47 @@ f_bashforth2(t,y):=y^2-t$
 float(adam_bashforth(f_bashforth, 0, 1, 10, 1, 6));
 float(adam_bashforth(f_bashforth2, 1, 2, 10, -1/log(2), 3));
 
+
+
+EJERCICIOS:
+
+Ejercicio 3:
+Considera el problema de valores iniciales siguiente:
+
+y'(t)= y^2(t)/(1+t), t in [1, 2]
+y(1)= −1/log2
+
+cuya solución es y(t)= −1/log(t + 1).
+
+    a) Calcula las aproximaciones de la solución obtenidas por los métodos de Taylor de orden 2 y
+       Taylor de orden 4 con h = 0.1 (10 iteraciones) y calcula los errores cometidos en cada caso.
+
+f_taylor(x,y):=y^2/(1+x)$
+sol2:taylor_r(f_taylor,1,float(-1/log(2)),2,2,10)$
+sol4:taylor_r(f_taylor,1,float(-1/log(2)),2,4,10)$
+
+f_sol(x):=−1/log(x+1)$
+valor:float(f_sol(2))$
+
+print("Valor real:", valor)$
+print("Valor obtenido con Taylor r=2:", sol2[2][11])$
+print("Valor obtenido con Taylor r=4:", sol4[2][11])$
+print("Error con r=2:", valor-sol2[2][11])$
+print("Error con r=4:", valor-sol4[2][11])$
+
+
+Ejercicio 12:
+Considera el problema de valores iniciales siguiente:
+
+y'(t)= 2−2t*y(t)/(1+t^2), t in [0, 1]
+y(0) = 1
+
+cuya solución es y(t)=(2t+1)/(t^2+1). Calcula las aproximaciones de la solución obtenidas
+por el método de Adams-Bashforth de 4 pasos con h = 0.1 en las situaciones siguientes:
+
+    a) Toma como aproximaciones iniciales las obtenidas por el m´etodo de Euler.
+    c) Toma como aproximaciones iniciales las obtenidas por el m´etodo de RungeKutta
+       de orden 4.
+
+Compara los errores cometidos en cada caso.
 
