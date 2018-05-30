@@ -1,31 +1,23 @@
 Programas Tema 3. Grupo 3
 Método de Euler:
 
-Euler(f, x0, y0, x1, n):=block(
-    vx : makelist(0,n),
-    vy : makelist(0,n),
-    h : (x1 - x0) / float(n),
-    x:x0,
-    y:y0,
-    vx[1]:x0,
-    vy[1]:y0,
+Euler(f, a, b, n, y0):=block(
+    h : (b - a) / n,
+    ret : [[a, y0]],
+    
     for i from 1 thru n do(
-        k: (f(x, y)),
-        vx[i]: x0 + i*h,
-        vy[i]: y + h*k,
-        y : vy[i],
-        x : vx[i]
+        ret : endcons([a+i*h, ret[i][2]+h*f(ret[i][1],ret[i][2])], ret)
     ),
-        [vx,vy]
+    
+    ret
 )$
 
 f_euler(x,y):=x*sqrt(y)$
 f_euler2(x,y):=x$
 f_euler3(x,y):=-y+x+1$
-Euler(f_euler,0,1,10,10);
-Euler(f_euler2,0,1,5,10);
-Euler(f_euler3,0,1,1,10);
-
+float(Euler(f_euler,0,10,10,1));
+float(Euler(f_euler2,0,5,10,1));
+float(Euler(f_euler3,0,1,10,1));
 
 
 
@@ -33,8 +25,12 @@ Método de Taylor de orden r. En este caso considera además como dato
 de entrada el orden r.
 
 eval_derivada(f, x0, y0, k):=block(
-    valor:subst([u=x0,v=y0],diff(f(u,v),v,k-1)),
-    return(valor)
+    if k=1 then return(f(x0,y0)),
+   if k>1 then
+        Fx(x,y):=block([u,v], return(subst([u=x,v=y], diff(f(u,v),u,k-1))+subst([u=x,v=y], diff(f(u,v),v,k-1))*f(x0,y0))),
+        valor:Fx(x0,y0),
+        return(valor)
+    
 )$
 
 funcion_taylor(f, x0, y0, h, r):=block(
@@ -43,8 +39,8 @@ funcion_taylor(f, x0, y0, h, r):=block(
 )$
 
 taylor_r(f, x0, y0, x1, r, n):=block(
-    vx : makelist(0,n),
-    vy : makelist(0,n),
+    vx : makelist(0,n+1),
+    vy : makelist(0,n+1),
     h : (x1 - x0) / float(n),
     x:x0,
     y:y0,
@@ -52,27 +48,25 @@ taylor_r(f, x0, y0, x1, r, n):=block(
     vy[1]:y0,
     for i from 1 thru n do(
         k:funcion_taylor(f,x,y,h,r),
-        vx[i]: x0 + i*h,
-        vy[i]: y + h*k,
-        y : vy[i],
-        x : vx[i]
+        vx[i+1]: x0 + i*h,
+        vy[i+1]: y + h*k,
+        y : vy[i+1],
+        x : vx[i+1]
     ),
         [vx,vy]
 )$
 
-f_taylor(x,y):=x$
+f_taylor(x,y):=-y+x+1$
 f_taylor2(x,y):=x*sqrt(y)$
-taylor_r(f_taylor,0,1,5,7,10);
-taylor_r(f_taylor2,0,1,10,7,10);
-
+taylor_r(f_taylor,0,1,1,2,10);
 
 
 
 Método de Runge-Kutta de orden 4.
 
 rk4(f, x0, y0, x1, n):=block(
-    vx : makelist(0,n),
-    vy : makelist(0,n),
+    vx : makelist(0,n+1),
+    vy : makelist(0,n+1),
     h : (x1 - x0) / float(n),
     x:x0,
     y:y0,
@@ -83,10 +77,10 @@ rk4(f, x0, y0, x1, n):=block(
         k2: (h * f(x + 0.5 * h, y + 0.5 * k1)),
         k3: (h * f(x + 0.5 * h, y + 0.5 * k2)),
         k4: (h * f(x + h, y + k3)),
-        vx[i]: x0 + i*h,
-        vy[i]: y + (k1 + 2*k2 + 2*k3 + k4) / 6,
-        y : vy[i],
-        x : vx[i]
+        vx[i+1]: x0 + i*h,
+        vy[i+1]: y + (k1 + 2*k2 + 2*k3 + k4) / 6,
+        y : vy[i+1],
+        x : vx[i+1]
     ),
         [vx,vy]
 )$
@@ -99,31 +93,30 @@ rk4(f_rk4_2,0,1,5,10);
 
 
 
-
 Método del trapecio, usando el método de Newton para aproximar
 la solución de la ecuación no lineal.
 
-trapecio(f, x0, y0, x1, n):=block(
-    vx : makelist(0,n),
-    vy : makelist(0,n),
+trapecio(f, x0,y0, x1, n) := block(
+    ratprint : false,
+     vx : makelist(0,n+1),
+    vy : makelist(0,n+1),
     h : (x1 - x0) / float(n),
-    x:x0,
-    y:y0,
     vx[1]:x0,
     vy[1]:y0,
-    for i from 1 thru n do( 
-        vx[i]: x0 + i*h,
-        vy[i]: y + h/2*(f(x,y)+f(vx[i],vy[i])),
-        y : vy[i],
-        x : vx[i]
+    
+    
+    for i from 1 thru n do(
+        
+        vx[i+1]: x0 + i*h, 
+        ecuacion(uj1) := -uj1 + vy[i] + h/2*( f(vx[i],vy[i]) + f(vx[i+1],uj1) ),
+        vy[i+1] : float(rhs(solve([ecuacion(x)=0], [x])[1]))        
     ),
-        [vx,vy]
+
+    return([vx,vy])
 )$
 
-f_trapecio(x,y):=log((x+1)^2)$
-f_trapecio2(x,y):=x$
-trapecio(f_trapecio,0,1,10,10);
-trapecio(f_trapecio2,0,1,5,10);
+f(x,y) := -y+x+1$
+val : trapecio(f, 0, 1, 1, 10);
 
 
 
@@ -132,3 +125,31 @@ trapecio(f_trapecio2,0,1,5,10);
 Método de Adams-Bashforth de k pasos. En este caso considera
 además como datos de entrada, el número k y los valores
 u1,...,uk−1, obtenidos por otro método de un paso.
+
+kill(x)$
+load(interpol)$
+
+adam_bashforth_aux(f, a, b, n, y0, k, u):=block(
+    h : (b - a) / n,
+    ret : cons([a, y0], u),
+    
+    for j from k thru n do(
+        nodes : [],
+        for i from 0 thru k-1 do(
+            push([ret[j-i][1], f(ret[j-i][1],ret[j-i][2])], nodes)
+        ),
+        
+        ret : endcons([last(ret)[1]+h, last(ret)[2] + integrate(lagrange(nodes), x, last(ret)[1], last(ret)[1]+h)], ret)
+    ),
+    
+    return(ret)
+)$
+
+adam_bashforth(f, a, b, n, y0, k):=adam_bashforth_aux(f, a, b, n, y0, k, rest(Euler(f, a, a+(k-1)*((b-a)/n), k-1, y0)))$
+
+f_bashforth(t,y):=-y+t+1$
+f_bashforth2(t,y):=y^2-t$
+float(adam_bashforth(f_bashforth, 0, 1, 10, 1, 6));
+float(adam_bashforth(f_bashforth2, 1, 2, 10, -1/log(2), 3));
+
+
