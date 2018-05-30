@@ -2,14 +2,15 @@
 Método de Euler:
 
 Euler(f, a, b, n, y0):=block(
+    [h,ret],
     h : (b - a) / n,
     ret : [[a, y0]],
-    
+
     for i from 1 thru n do(
         ret : endcons([a+i*h, ret[i][2]+h*f(ret[i][1],ret[i][2])], ret)
     ),
-    
-    ret
+
+    return(ret)
 )$
 
 f_euler(x,y):=x*sqrt(y)$
@@ -30,7 +31,7 @@ eval_derivada(f, x0, y0, k):=block(
         Fx(x,y):=block([u,v], return(subst([u=x,v=y], diff(f(u,v),u,k-1))+subst([u=x,v=y], diff(f(u,v),v,k-1))*f(x0,y0))),
         valor:Fx(x0,y0),
         return(valor)
-    
+
 )$
 
 funcion_taylor(f, x0, y0, h, r):=block(
@@ -65,24 +66,25 @@ taylor_r(f_taylor,0,1,1,2,10);
 Método de Runge-Kutta de orden 4.
 
 rk4(f, x0, y0, x1, n):=block(
+    [vx,vy,h,x,y,k1,k2,k3,k4],
     vx : makelist(0,n+1),
     vy : makelist(0,n+1),
-    h : (x1 - x0) / float(n),
+    h : (x1 - x0) / n,
     x:x0,
     y:y0,
     vx[1]:x0,
     vy[1]:y0,
     for i from 1 thru n do(
         k1: (h * f(x, y)),
-        k2: (h * f(x + 0.5 * h, y + 0.5 * k1)),
-        k3: (h * f(x + 0.5 * h, y + 0.5 * k2)),
+        k2: (h * f(x + (1/2) * h, y + (1/2) * k1)),
+        k3: (h * f(x + (1/2) * h, y + (1/2) * k2)),
         k4: (h * f(x + h, y + k3)),
         vx[i+1]: x0 + i*h,
         vy[i+1]: y + (k1 + 2*k2 + 2*k3 + k4) / 6,
         y : vy[i+1],
         x : vx[i+1]
     ),
-        [vx,vy]
+    [vx,vy]
 )$
 
 f_rk4(x,y):=x*sqrt(y)$
@@ -103,13 +105,13 @@ trapecio(f, x0,y0, x1, n) := block(
     h : (x1 - x0) / float(n),
     vx[1]:x0,
     vy[1]:y0,
-    
-    
+
+
     for i from 1 thru n do(
-        
-        vx[i+1]: x0 + i*h, 
+
+        vx[i+1]: x0 + i*h,
         ecuacion(uj1) := -uj1 + vy[i] + h/2*( f(vx[i],vy[i]) + f(vx[i+1],uj1) ),
-        vy[i+1] : float(rhs(solve([ecuacion(x)=0], [x])[1]))        
+        vy[i+1] : float(rhs(solve([ecuacion(x)=0], [x])[1]))
     ),
 
     return([vx,vy])
@@ -118,34 +120,40 @@ trapecio(f, x0,y0, x1, n) := block(
 f(x,y) := -y+x+1$
 val : trapecio(f, 0, 1, 1, 10);
 
+Método de Runge-Kutta ajustado para funcionar con el método
+de Adams-Bashforth
 
-
-
+rk4_aux(f, a, b, n, y0):=block(
+    [ret],
+    ret : rk4(f, a, y0, b, n),
+    ret : makelist([ret[1][i],ret[2][i]], i, length(ret[1])),
+    return(ret)
+)$
 
 Método de Adams-Bashforth de k pasos. En este caso considera
 además como datos de entrada, el número k y los valores
 u1,...,uk−1, obtenidos por otro método de un paso.
 
-kill(x)$
 load(interpol)$
 
 adam_bashforth_aux(f, a, b, n, y0, k, u):=block(
+    [h,ret,nodes],
     h : (b - a) / n,
     ret : cons([a, y0], u),
-    
+
     for j from k thru n do(
         nodes : [],
         for i from 0 thru k-1 do(
             push([ret[j-i][1], f(ret[j-i][1],ret[j-i][2])], nodes)
         ),
-        
+
         ret : endcons([last(ret)[1]+h, last(ret)[2] + integrate(lagrange(nodes), x, last(ret)[1], last(ret)[1]+h)], ret)
     ),
-    
+
     return(ret)
 )$
 
-adam_bashforth(f, a, b, n, y0, k):=adam_bashforth_aux(f, a, b, n, y0, k, rest(Euler(f, a, a+(k-1)*((b-a)/n), k-1, y0)))$
+adam_bashforth(f, a, b, n, y0, k, method):=adam_bashforth_aux(f, a, b, n, y0, k, rest(method(f, a, a+(k-1)*((b-a)/n), k-1, y0)))$
 
 f_bashforth(t,y):=-y+t+1$
 f_bashforth2(t,y):=y^2-t$
@@ -196,3 +204,15 @@ por el método de Adams-Bashforth de 4 pasos con h = 0.1 en las situaciones sigu
 
 Compara los errores cometidos en cada caso.
 
+f_12(t,y):=(2-2*t*y)/(1+t^2)$
+v_exact : float(makelist([t,(2*t+1)/(t^2+1)], t, 0, 1, 1/10))$
+v_approx_eu : float(adam_bashforth(f_12, 0, 1, 10, 1, 4, Euler))$
+v_approx_rk : float(adam_bashforth(f_12, 0, 1, 10, 1, 4, rk4_aux))$
+v_error_eu : float(makelist(abs(v_exact[i][2]-v_approx_eu[i][2]), i, length(v_exact)))$
+v_error_rk : float(makelist(abs(v_exact[i][2]-v_approx_rk[i][2]), i, length(v_exact)))$
+
+print("Valor real: ", last(v_exact)[2])$
+print("Valor obtenido con Euler: ", last(v_approx_eu)[2])$
+print("Error usando Euler: ", last(v_error_eu))$
+print("Valor obtenido con Runge-Kutta: ", last(v_approx_rk)[2])$
+print("Error usando Runge-Kutta: ", last(v_error_rk))$
